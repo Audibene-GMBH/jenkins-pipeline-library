@@ -80,8 +80,8 @@ class Image {
         hooks.afterRun()
     }
 
-    Image build() {
-        def image = docker.build(this.id)
+    Image build(path = '.') {
+        def image = docker.build(this.id, path)
         def id = image.imageName() as String
         return new Image(script, id, args, hooks)
     }
