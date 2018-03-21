@@ -63,12 +63,17 @@ class BeansTalkDeployer implements ArtifactDeployer {
                 params.environment
         ]
 
+        ArrayList<String> environmentName = [
+                config.application,
+                params.environment
+        ]
+
         script.step([
                 $class                  : 'AWSEBDeploymentBuilder',
                 credentialId            : config.get('credentialId', credentials.join('-')),
                 awsRegion               : config.get('region'),
                 applicationName         : config.application,
-                environmentName         : params.environment,
+                environmentName         : environmentName.join('-'),
                 bucketName              : config.get('bucket', ''),
                 keyPrefix               : config.get('keyPrefix', config.application),
                 versionLabelFormat      : params.get('label', artifact.split('/').last()),
