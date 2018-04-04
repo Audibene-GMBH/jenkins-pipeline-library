@@ -1,5 +1,6 @@
 package de.audibene.jenkins.pipeline.deployer
 
+import de.audibene.jenkins.pipeline.scm.Scm
 import groovy.json.JsonBuilder
 
 import static de.audibene.jenkins.pipeline.Milestones.DEPLOY
@@ -9,8 +10,10 @@ class BeansTalkDeployer implements ArtifactDeployer {
 
     private final def script
     private final Map config
+    private final Scm scm
 
-    BeansTalkDeployer(def script, config) {
+    BeansTalkDeployer(def script, config, Scm scm) {
+        this.scm = scm
         this.script = script
         this.config = config
     }
@@ -34,11 +37,12 @@ class BeansTalkDeployer implements ArtifactDeployer {
             script.milestone(ordinal: DEPLOY + 300)
 
             script.buildNode(config.node) {
-                script.deleteDir()
                 script.buildStep("Deploy to ${environment}") {
-                    switch (config.platform) {
-                        case 'docker': docker(params); break
-                        default: unknown()
+                    scm.checkout {
+                        switch (config.platform) {
+                            case 'docker': docker(params); break
+                            default: unknown()
+                        }
                     }
                 }
             }
