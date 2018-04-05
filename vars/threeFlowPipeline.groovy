@@ -106,7 +106,8 @@ class FlowConfig {
 
     def beansTalk(Closure body) {
         def config = configure(body)
-        def deployer = new BeansTalkDeployer(script, config)
+        requireNonNull(scm, 'FlowConfig.scm')
+        def deployer = new BeansTalkDeployer(script, config, scm)
         this.deployer = deployer.validated()
     }
 
