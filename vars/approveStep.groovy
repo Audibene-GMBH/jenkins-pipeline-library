@@ -2,6 +2,7 @@
 
 import de.audibene.jenkins.pipeline.exception.ApproveStepRejected
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
+import com.cloudbees.groovy.cps.NonCPS
 
 def call(String name, Map params = [:]) {
     def time = params.get('time', 365)

@@ -87,7 +87,7 @@ class FlowConfig {
     ArtifactBuilder builder
     ArtifactDeployer deployer
     Map<String, String> branches = [snapshot: 'develop', candidate: 'candidate', release: 'master']
-    Map<String, String> environments = [snapshot: 'develop', candidate: 'staging', release: 'production']
+    Map<String, String> environments = [snapshot: 'testing', candidate: 'staging', release: 'production']
 
 
     FlowConfig(script) {
