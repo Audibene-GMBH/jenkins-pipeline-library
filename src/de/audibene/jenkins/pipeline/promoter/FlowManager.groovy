@@ -40,7 +40,7 @@ class FlowManager {
 
                 if (params.get('start', false)) {
                     boolean allowStarted = params.get('allowStarted', true)
-                    String increment = params.get('increment', '0.1.0')
+                    String increment = params.get('increment', '0.0.1')
                     startVersion(allowStarted, increment)
                 }
 
