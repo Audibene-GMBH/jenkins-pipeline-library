@@ -3,6 +3,7 @@ import de.audibene.jenkins.pipeline.builder.ArtifactBuilder
 import de.audibene.jenkins.pipeline.builder.SimpleArtifactBuilder
 import de.audibene.jenkins.pipeline.deployer.ArtifactDeployer
 import de.audibene.jenkins.pipeline.deployer.BeansTalkDeployer
+import de.audibene.jenkins.pipeline.deployer.CloudFrontArtifactDeployer
 import de.audibene.jenkins.pipeline.exception.ApproveStepRejected
 import de.audibene.jenkins.pipeline.promoter.FlowManager
 import de.audibene.jenkins.pipeline.scm.Git
@@ -108,6 +109,12 @@ class FlowConfig {
         def config = configure(body)
         requireNonNull(scm, 'FlowConfig.scm')
         def deployer = new BeansTalkDeployer(script, config, scm)
+        this.deployer = deployer.validated()
+    }
+
+    def cloudFront(Closure body) {
+        def config = configure(body)
+        def deployer = new CloudFrontArtifactDeployer(script, config)
         this.deployer = deployer.validated()
     }
 
