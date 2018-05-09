@@ -23,16 +23,20 @@ class CloudFrontArtifactDeployer implements ArtifactDeployer {
         def deployBucket = requireNonNull(environmentConfig.bucket, {
             "CloudFrontArtifactDeployer.config.environments.${environment}.bucket"
         }) as String
+        
+        println "CHECK: deployBucket cloudfront $deployBucket"
+        println "CHECK: artifact cloudfront $artifact"
+        println "CHECK: params cloudfront $params"
 
         script.s3Download(file: 'build.gz', bucket: artifactBucket, path: "{$artifact}.gz")
-        script.sh 'tar -xzf build.gz'
-        script.s3Upload(includePathPattern: 'build/*', bucket: deployBucket, path: 'dist', acl: 'PublicRead')
+        // script.sh 'tar -xzf build.gz'
+        // script.s3Upload(includePathPattern: 'build/*', bucket: deployBucket, path: 'dist', acl: 'PublicRead')
 
         def instance = requireNonNull(environmentConfig.instance, {
             "CloudFrontArtifactDeployer.config.environments.${environment}.instance"
         }) as String
-        script.pritn("TODO: invalidate cloud front instance: $instance")
-        print('TODO: invalidate cloudfront') //TODO
+
+        println "TODO: invalidate cloud front instance: $instance"
         script.milestone(ordinal: DEPLOY + 400)
     }
 
