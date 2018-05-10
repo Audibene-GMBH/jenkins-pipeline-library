@@ -24,20 +24,27 @@ class CloudFrontArtifactDeployer implements ArtifactDeployer {
             "CloudFrontArtifactDeployer.config.environments.${environment}.bucket"
         }) as String
         
-        println "CHECK: deployBucket cloudfront $deployBucket"
-        println "CHECK: artifact cloudfront $artifact"
-        println "CHECK: params cloudfront $params"
+        
+        script.lock(resource: "${script.env.JOB_NAME}:deploy:$environment", inversePrecedence: true) {
+            script.milestone(ordinal: DEPLOY + 300)
 
-        script.s3Download(file: 'build.gz', bucket: artifactBucket, path: "{$artifact}.gz")
-        // script.sh 'tar -xzf build.gz'
-        // script.s3Upload(includePathPattern: 'build/*', bucket: deployBucket, path: 'dist', acl: 'PublicRead')
+            script.buildNode(config.node) {
+                script.buildStep("Deploy to ${environment}") {
+                    script.s3Download(file: 'build.gz', bucket: artifactBucket, path: "${artifact}.gz")
+                    script.sh 'tar -xzf build.gz'
+                    script.s3Upload(workingDir: 'build', includePathPattern: '**/*', bucket: deployBucket, path: 'dist', acl: 'PublicRead')
+                }
 
-        def instance = requireNonNull(environmentConfig.instance, {
-            "CloudFrontArtifactDeployer.config.environments.${environment}.instance"
-        }) as String
+                script.buildStep("Invalidate CloudFront cache for ${environment}") {
+                    def instance = requireNonNull(environmentConfig.instance, {
+                        "CloudFrontArtifactDeployer.config.environments.${environment}.instance"
+                    }) as String
 
-        println "TODO: invalidate cloud front instance: $instance"
-        script.milestone(ordinal: DEPLOY + 400)
+                    println "TODO: invalidate cloud front instance: $instance"
+                }
+            }
+            script.milestone(ordinal: DEPLOY + 400)
+        }
     }
 
     def validated() {
