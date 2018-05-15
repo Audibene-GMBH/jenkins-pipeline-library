@@ -30,9 +30,10 @@ class CloudFrontArtifactDeployer implements ArtifactDeployer {
 
             script.buildNode(config.node) {
                 script.buildStep("Deploy to ${environment}") {
-                    script.s3Download(file: 'build.gz', bucket: artifactBucket, path: "${artifact}.gz")
-                    script.sh 'tar -xzf build.gz'
+                    script.s3Download(file: "${artifact}.gz", bucket: artifactBucket, path: "${artifact}.gz")
+                    script.sh "tar -xzf ${artifact}.gz"
                     script.s3Upload(workingDir: 'build', includePathPattern: '**/*', bucket: deployBucket, path: 'dist', acl: 'PublicRead')
+                    script.sh "rm ${artifact}.gz"
                 }
 
                 script.buildStep("Invalidate CloudFront cache for ${environment}") {
