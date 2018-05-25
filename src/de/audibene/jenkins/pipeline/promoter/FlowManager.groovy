@@ -143,12 +143,19 @@ class FlowManager {
 
         def version = extractVersion(versionTag)
         def versions = version.tokenize('.')
-        def factors = [1e6, 1e3, 1]
+        def factors = [1e9, 1e6, 1e3]
 
         def result = 0
+
+        if (versionTag.endsWith('-begin')) {
+            result += 50
+        } else if (versionTag.endsWith('-end')) {
+            result += 100
+        }
+
         for (int index : 0..2) {
-            int versionValue = Integer.parseInt(versions[index])
-            int factorValue = factors[index]
+            def versionValue = Integer.parseInt(versions[index])
+            def factorValue = factors[index]
             result += versionValue * factorValue
         }
         return result
