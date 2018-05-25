@@ -103,7 +103,7 @@ class FlowManager {
 
     private resolveVersionTag() {
         List<String> versionTags = scm.branchTags().findAll { it.startsWith('version') }
-        return versionTags.max() ?: 'initial'
+        return versionTags.max { versionWeight(it) } ?: 'initial'
     }
 
     private void finishVersion(boolean allowFinished) {
@@ -136,6 +136,22 @@ class FlowManager {
 
     private static String extractVersion(String versionTag) {
         return versionTag.replace('version-', '').replace('-begin', '').replace('-end', '')
+    }
+
+    private static int versionWeight(String versionTag) {
+        if (versionTag == 'initial') return 0
+
+        def version = extractVersion(versionTag)
+        def versions = version.tokenize('.')
+        def factors = [1e6, 1e3, 1]
+
+        def result = 0
+        for (int index : 0..2) {
+            int versionValue = Integer.parseInt(versions[index])
+            int factorValue = factors[index]
+            result += versionValue * factorValue
+        }
+        return result
     }
 
     private static String nextVersion(String version, String increment) {
