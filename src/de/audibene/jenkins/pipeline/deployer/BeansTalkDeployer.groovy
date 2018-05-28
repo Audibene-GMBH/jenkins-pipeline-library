@@ -87,8 +87,8 @@ class BeansTalkDeployer implements ArtifactDeployer {
                 excludes                : config.get('excludes', ''),
                 zeroDowntime            : config.get('zeroDowntime', false),
                 checkHealth             : config.get('checkHealth', true),
-                sleepTime               : config.get('sleepTime', 10),
-                maxAttempts             : config.get('maxAttempts', 20)
+                sleepTime               : config.get('sleepTime', 30),
+                maxAttempts             : config.get('maxAttempts', 30)
         ])
     }
 
