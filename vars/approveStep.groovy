@@ -10,14 +10,16 @@ def call(String name, Map params = [:]) {
     def message = params.message ?: name
     def timeoutAs = params.get('timeoutAs', false)
 
-    buildStep(name) {
-        def approve = getApprove(time, unit, message, timeoutAs)
-        def result = approve.result ? "approved" : "rejected"
-        echo "$name: $result by ${approve.userName}"
+    buildNode('master') {
+        buildStep(name) {
+            def approve = getApprove(time, unit, message, timeoutAs)
+            def result = approve.result ? "approved" : "rejected"
+            echo "$name: $result by ${approve.userName}"
 
-        if (!approve.result) {
-            stageStatus = 'ABORTED'
-            throw new ApproveStepRejected("Rejected by ${approve.userName}")
+            if (!approve.result) {
+                stageStatus = 'ABORTED'
+                throw new ApproveStepRejected("Rejected by ${approve.userName}")
+            }
         }
     }
 
