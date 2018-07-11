@@ -1,8 +1,7 @@
 #!groovy
-
+import com.cloudbees.groovy.cps.NonCPS
 import de.audibene.jenkins.pipeline.exception.ApproveStepRejected
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
-import com.cloudbees.groovy.cps.NonCPS
 
 def call(String name, Map params = [:]) {
     def time = params.get('time', 365)
@@ -10,16 +9,14 @@ def call(String name, Map params = [:]) {
     def message = params.message ?: name
     def timeoutAs = params.get('timeoutAs', false)
 
-    buildNode('master') {
-        buildStep(name) {
-            def approve = getApprove(time, unit, message, timeoutAs)
-            def result = approve.result ? "approved" : "rejected"
-            echo "$name: $result by ${approve.userName}"
+    buildStep(name) {
+        def approve = getApprove(time, unit, message, timeoutAs)
+        def result = approve.result ? "approved" : "rejected"
+        echo "$name: $result by ${approve.userName}"
 
-            if (!approve.result) {
-                stageStatus = 'ABORTED'
-                throw new ApproveStepRejected("Rejected by ${approve.userName}")
-            }
+        if (!approve.result) {
+            stageStatus = 'ABORTED'
+            throw new ApproveStepRejected("Rejected by ${approve.userName}")
         }
     }
 
