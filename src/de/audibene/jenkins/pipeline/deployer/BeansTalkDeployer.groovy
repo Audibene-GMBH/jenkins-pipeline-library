@@ -45,6 +45,11 @@ class BeansTalkDeployer implements ArtifactDeployer {
                         }
                     }
                 }
+                if (config.onDeploy) {
+                    script.buildStep("Post deploy to ${params.environment}") {
+                        (config.onDeploy as Closure)(params.environment, params.artifact)
+                    }
+                }
             }
 
             script.milestone(ordinal: DEPLOY + 400)
