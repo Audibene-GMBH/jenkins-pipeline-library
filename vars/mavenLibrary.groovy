@@ -23,7 +23,7 @@ def call(Closure body) {
     }
 
 
-    if (env.BRANCH_NAME) {
+    if (env.BRANCH_NAME == 'master') {
         approveStep('Release new version?')
 
         buildNode(dockerConfig.label) {
