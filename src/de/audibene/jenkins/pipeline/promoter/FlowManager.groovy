@@ -2,7 +2,6 @@ package de.audibene.jenkins.pipeline.promoter
 
 import de.audibene.jenkins.pipeline.scm.Scm
 
-import static de.audibene.jenkins.pipeline.Milestones.BUILD
 import static de.audibene.jenkins.pipeline.Milestones.PROMOTE
 import static java.util.Objects.requireNonNull
 
