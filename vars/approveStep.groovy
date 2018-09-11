@@ -1,6 +1,5 @@
 #!groovy
 import com.cloudbees.groovy.cps.NonCPS
-import de.audibene.jenkins.pipeline.exception.ApproveStepRejected
 import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 
 def call(String name, Map params = [:]) {
@@ -15,8 +14,7 @@ def call(String name, Map params = [:]) {
         echo "$name: $result by ${approve.userName}"
 
         if (!approve.result) {
-            stageStatus = 'ABORTED'
-            throw new ApproveStepRejected("Rejected by ${approve.userName}")
+            throw (approve.exception as Throwable)
         }
     }
 
@@ -31,7 +29,7 @@ private def getApprove(time, unit, message, timeoutAs) {
     } catch (FlowInterruptedException e) {
         def rejectedBy = getRejectedBy(e)
         def result = rejectedBy == "SYSTEM" && timeoutAs
-        return [result: result, userName: rejectedBy]
+        return [result: result, userName: rejectedBy, exception: e]
     }
 }
 

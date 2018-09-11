@@ -4,11 +4,10 @@ import de.audibene.jenkins.pipeline.builder.SimpleArtifactBuilder
 import de.audibene.jenkins.pipeline.deployer.ArtifactDeployer
 import de.audibene.jenkins.pipeline.deployer.BeansTalkDeployer
 import de.audibene.jenkins.pipeline.deployer.CloudFrontArtifactDeployer
-import de.audibene.jenkins.pipeline.exception.ApproveStepRejected
 import de.audibene.jenkins.pipeline.promoter.FlowManager
 import de.audibene.jenkins.pipeline.scm.Git
 import de.audibene.jenkins.pipeline.scm.Scm
-
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
 import static de.audibene.jenkins.pipeline.Configurers.configure
 import static java.util.Objects.requireNonNull
 
@@ -75,8 +74,10 @@ def pipeline(Closure body) {
         } else if (env.BRANCH_NAME == branches.release) {
             releaseFlow()
         }
-    } catch (ApproveStepRejected ignore) {
-        currentBuild.result = 'NOT_BUILT'
+    } catch (FlowInterruptedException e) {
+        echo "build was interrupted, but pipeline"
+        stageStatus = 'ABORTED'
+        currentBuild.result = 'SUCCESS'
     }
 
 }
