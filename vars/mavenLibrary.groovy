@@ -5,20 +5,15 @@ def call(Closure body) {
     def config = configure(new LibraryConfig(this), body)
     def dockerConfig = config.dockerConfig
     def gitConfig = config.gitConfig
-    def mavenConfig = config.mavenConfig
 
     def buildTag = Long.toString(new Date().time, Character.MAX_RADIX)
 
-    def maven = fluentDocker().image(id: dockerConfig.image, args: dockerConfig.args)
+    def java = fluentDocker().image(id: dockerConfig.image, args: dockerConfig.args)
 
     buildNode(dockerConfig.label) {
         buildStep('Build') {
             checkout scm
-            try {
-                maven.inside { sh 'mvn -B clean verify' }
-            } finally {
-                junit 'target/*/*.xml'
-            }
+            java.inside { mvn 'clean verify' }
         }
     }
 
@@ -30,11 +25,9 @@ def call(Closure body) {
             buildStep('Release') {
                 checkout scm
                 String version = "${buildTag}.RELEASE"
-                maven.inside {
-                    configFileProvider([configFile(fileId: mavenConfig, variable: 'MAVEN_SETTINGS')]) {
-                        sh "mvn -B versions:set -DnewVersion=$version"
-                        sh 'mvn -s $MAVEN_SETTINGS -B clean deploy -DskipITs -DskipTests'
-                    }
+                java.inside {
+                    mvn "versions:set -DnewVersion=$version"
+                    mvn "clean deploy -DskipITs -DskipTests"
                 }
 
                 sshagent([gitConfig.credentials]) {
