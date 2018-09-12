@@ -1,6 +1,9 @@
+import org.jenkinsci.plugins.workflow.steps.FlowInterruptedException
+
 import static de.audibene.jenkins.pipeline.Configurers.configure
 
 def call(Closure body) {
+
 
     def config = configure(new LibraryConfig(this), body)
     def dockerConfig = config.dockerConfig
@@ -10,35 +13,43 @@ def call(Closure body) {
 
     def java = fluentDocker().image(id: dockerConfig.image, args: dockerConfig.args)
 
-    buildNode(dockerConfig.label) {
-        buildStep('Build') {
-            checkout scm
-            java.inside { mvn 'clean verify' }
-        }
-    }
-
-
-    if (env.BRANCH_NAME == 'master') {
-        approveStep('Release new version?')
+    try {
 
         buildNode(dockerConfig.label) {
-            buildStep('Release') {
+            buildStep('Build') {
                 checkout scm
-                String version = "${buildTag}.RELEASE"
-                java.inside {
-                    mvn "versions:set -DnewVersion=$version"
-                    mvn "clean deploy -DskipITs -DskipTests"
-                }
+                java.inside { mvn 'clean verify' }
+            }
+        }
 
-                sshagent([gitConfig.credentials]) {
-                    sh "git config user.name '${gitConfig.username}'"
-                    sh "git config user.email '${gitConfig.email}'"
 
-                    sh "git commit -a -m 'Release version $version'"
-                    sh "git push origin HEAD:refs/tags/$buildTag"
+        if (env.BRANCH_NAME == 'master') {
+            approveStep('Release new version?')
+
+            buildNode(dockerConfig.label) {
+                buildStep('Release') {
+                    checkout scm
+                    String version = "${buildTag}.RELEASE"
+                    java.inside {
+                        mvn "versions:set -DnewVersion=$version"
+                        mvn "clean deploy -DskipITs -DskipTests"
+                    }
+
+                    sshagent([gitConfig.credentials]) {
+                        sh "git config user.name '${gitConfig.username}'"
+                        sh "git config user.email '${gitConfig.email}'"
+
+                        sh "git commit -a -m 'Release version $version'"
+                        sh "git push origin HEAD:refs/tags/$buildTag"
+                    }
                 }
             }
         }
+
+    } catch (FlowInterruptedException ignore) {
+        echo "build was interrupted, but pipeline"
+        stageStatus = 'ABORTED'
+        currentBuild.result = 'SUCCESS'
     }
 }
 
@@ -55,8 +66,6 @@ class LibraryConfig {
             email      : 'jenkins@audibene.de',
             credentials: 'jenkins-audibene-ssh'
     ]
-    def mavenConfig = 'nexus.audibene.net'
-    def timeout = [time: 1, unit: 'HOURS']
 
     LibraryConfig(def script) {
         this.script = script
