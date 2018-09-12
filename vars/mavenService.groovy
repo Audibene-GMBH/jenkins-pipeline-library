@@ -58,7 +58,7 @@ def call(Map appConfig, Closure body) {
                     }
                 }
                 buildStep('Build') {
-                    artifact = docker.image(name: appConfig.id, tag: tag).build()
+                    artifact = docker.image(name: appConfig.id, tag: tag).build(dockerConfig.context)
                 }
             }
 
@@ -104,6 +104,7 @@ class ServiceConfig {
 
     def dockerConfig = [
             label   : 'ecs',
+            context : '.',
             java    : 'maven:3-jdk-8-slim',
             postgres: 'postgres:9.6'
     ]
