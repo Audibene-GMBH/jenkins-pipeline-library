@@ -18,7 +18,10 @@ def call(Closure body) {
         buildNode(dockerConfig.label) {
             buildStep('Build') {
                 checkout scm
-                java.inside { mvn 'clean verify' }
+                java.inside {
+                    mvn '--version'
+                    mvn 'clean verify'
+                }
             }
         }
 
@@ -58,7 +61,7 @@ class LibraryConfig {
 
     def dockerConfig = [
             label: 'ecs',
-            image: 'maven:3-jdk-8-slim',
+            image: 'maven:3.5.3-jdk-8-slim',
             args : '-v "$HOME/.m2":/root/.m2'
     ]
     def gitConfig = [

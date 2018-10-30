@@ -44,6 +44,7 @@ def call(Map appConfig, Closure body) {
 
                 buildStep('Validate') {
                     java.inside {
+                        mvn '--version'
                         mvn 'verify -DskipTests -DskipITs'
                     }
                 }
@@ -105,7 +106,7 @@ class ServiceConfig {
     def dockerConfig = [
             label   : 'ecs',
             context : '.',
-            java    : 'maven:3-jdk-8-slim',
+            java    : 'maven:3.5.3-jdk-8-slim',
             postgres: 'postgres:9.6'
     ]
 
