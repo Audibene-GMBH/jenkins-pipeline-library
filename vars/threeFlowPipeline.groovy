@@ -115,14 +115,6 @@ class FlowConfig {
 
     def cloudFront(Closure body) {
         def config = configure(body)
-
-        if (config.environments != null && config.deployBuckets == null) {
-            config.deployBuckets = [:]
-            for(entry in config.environments) {
-                config.deployBuckets[entry.key] = entry.value.bucket
-            }
-        }
-
         def deployer = new CloudFrontArtifactDeployer(script, config)
         this.deployer = deployer.validated()
     }
