@@ -2,12 +2,14 @@ package de.audibene.jenkins.pipeline.deployer
 
 import static de.audibene.jenkins.pipeline.Milestones.DEPLOY
 import static java.util.Objects.requireNonNull
+import com.amazonaws.services.s3.model.CannedAccessControlList
 // import groovy.json.*
 
 class CloudFrontArtifactDeployer implements ArtifactDeployer {
 
     private final def script
     private final Map config
+//    private final AccessControlList  permissiions
 
     CloudFrontArtifactDeployer(def script, def config) {
         this.script = script
@@ -57,8 +59,8 @@ class CloudFrontArtifactDeployer implements ArtifactDeployer {
                         script.sh "sed -i 's/${entry[0]}/${entry[1]}/g' build/index.html"
                     }
 
-                    script.s3Upload(workingDir: 'build', includePathPattern: '**/*', bucket: deployBucket, path: 'dist', acl: 'PublicRead')
-                    script.s3Upload(workingDir: 'build', file: 'index.html', bucket: deployBucket, path: 'dist/index.html', acl: 'PublicRead', cacheControl:'no-cache')
+                    script.s3Upload(workingDir: 'build', includePathPattern: '**/*', bucket: deployBucket, path: 'dist', acl: 'BucketOwnerFullControl, PublicRead')
+                    script.s3Upload(workingDir: 'build', file: 'index.html', bucket: deployBucket, path: 'dist/index.html', acl: 'BucketOwnerFullControl, PublicRead', cacheControl:'no-cache')
 
                     script.sh "rm ${artifact}.gz"
                 }
