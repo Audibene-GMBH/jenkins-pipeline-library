@@ -58,6 +58,8 @@ class CloudFrontArtifactDeployer implements ArtifactDeployer {
                     }
 
                     script.s3Upload(workingDir: 'build', includePathPattern: '**/*', bucket: deployBucket, path: 'dist', acl: 'PublicRead')
+                    script.s3Upload(workingDir: 'build', file: 'index.html', bucket: deployBucket, path: 'dist/index.html', acl: 'PublicRead', cacheControl:'no-cache')
+
                     script.sh "rm ${artifact}.gz"
                 }
             }
