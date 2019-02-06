@@ -59,11 +59,12 @@ class CloudFrontArtifactDeployer implements ArtifactDeployer {
                         script.sh "sed -i 's/${entry[0]}/${entry[1]}/g' build/index.html"
                     }
 
-                    script.s3Upload(workingDir: 'build', includePathPattern: '**/*', bucket: deployBucket, path: 'dist', acl: 'BucketOwnerFullControl')
-                    script.s3Upload(workingDir: 'build', file: 'index.html', bucket: deployBucket, path: 'dist/index.html', acl: 'BucketOwnerFullControl', cacheControl:'no-cache')
+                    script.s3Upload(workingDir: 'build', includePathPattern: '**/*', bucket: deployBucket, path: 'dist', acl: 'PublicRead')
+                    script.s3Upload(workingDir: 'build', file: 'index.html', bucket: deployBucket, path: 'dist/index.html', acl: 'PublicRead', cacheControl:'no-cache')
+                    
                     // because upload is not supporting AccessControlList
-                    script.s3Copy(fromBucket:deployBucket, fromPath:'dist', toBucket:deployBucket, toPath:'dist', acl: 'PublicRead')
-
+                    script.sh "aws s3 cp s3://${deployBucket}/ s3://${deployBucket}/ --recursive --acl bucket-owner-full-control"
+                    // remove the old artifact
                     script.sh "rm ${artifact}.gz"
                 }
             }
