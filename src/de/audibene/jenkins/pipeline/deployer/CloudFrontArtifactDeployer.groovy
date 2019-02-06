@@ -1,18 +1,15 @@
 package de.audibene.jenkins.pipeline.deployer
 
-import com.amazonaws.services.s3.model.GroupGrantee
-import com.amazonaws.services.s3.model.Permission
-
 import static de.audibene.jenkins.pipeline.Milestones.DEPLOY
 import static java.util.Objects.requireNonNull
-import com.amazonaws.services.s3.model.AccessControlList
+import com.amazonaws.services.s3.model.PutObjectRequest;
+
 // import groovy.json.*
 
 class CloudFrontArtifactDeployer implements ArtifactDeployer {
 
     private final def script
     private final Map config
-    private AccessControlList acl
 
     CloudFrontArtifactDeployer(def script, def config) {
         this.script = script
@@ -46,12 +43,6 @@ class CloudFrontArtifactDeployer implements ArtifactDeployer {
             "CloudFrontArtifactDeployer.config.environments.${environment}.params"
         }) as Map<String, Object>
 
-        acl = new AccessControlList()
-        acl.grantPermission(GroupGrantee.AllUsers, Permission.Read)
-        acl.grantPermission(GroupGrantee.AuthenticatedUsers, Permission.FullControl)
-
-
-
         script.lock(resource: "${script.env.JOB_NAME}:deploy:$environment", inversePrecedence: true) {
             script.milestone(ordinal: DEPLOY + 300)
             
@@ -68,9 +59,10 @@ class CloudFrontArtifactDeployer implements ArtifactDeployer {
                         script.sh "sed -i 's/${entry[0]}/${entry[1]}/g' build/index.html"
                     }
 
-
-                    script.s3Upload(workingDir: 'build', includePathPattern: '**/*', bucket: deployBucket, path: 'dist', acl: acl)
-                    script.s3Upload(workingDir: 'build', file: 'index.html', bucket: deployBucket, path: 'dist/index.html', acl: acl, cacheControl:'no-cache')
+                    script.s3Upload(workingDir: 'build', includePathPattern: '**/*', bucket: deployBucket, path: 'dist', acl: 'BucketOwnerFullControl')
+                    script.s3Upload(workingDir: 'build', file: 'index.html', bucket: deployBucket, path: 'dist/index.html', acl: 'BucketOwnerFullControl', cacheControl:'no-cache')
+                    // because upload is not supporting AccessControlList
+                    script.s3Copy(fromBucket:deployBucket, fromPath:'dist', toBucket:deployBucket, toPath:'dist', acl: 'PublicRead')
 
                     script.sh "rm ${artifact}.gz"
                 }
