@@ -45,12 +45,12 @@ def call(Map appConfig, Closure body) {
                 buildStep('Validate') {
                     java.inside {
                         mvn '--version'
-                        mvn 'verify -DskipTests -DskipITs'
+                        mvn '-T 24 verify -DskipTests -DskipITs'
                     }
                 }
                 buildStep('Test') {
                     java.inside {
-                        mvn 'verify -DskipITs'
+                        mvn '-T 24 verify -DskipITs'
                     }
                 }
                 buildStep('Verify') {
