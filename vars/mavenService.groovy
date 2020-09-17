@@ -55,7 +55,7 @@ def call(Map appConfig, Closure body) {
                 }
                 buildStep('Verify') {
                     java.args('-e SPRING_DATASOURCE_URL=jdbc:postgresql://pg:5432/postgres').with('pg', pg) {
-                        mvn 'verify -DskipTests'
+                        mvn '-T 24 verify -DskipTests'
                     }
                 }
                 buildStep('Build') {
