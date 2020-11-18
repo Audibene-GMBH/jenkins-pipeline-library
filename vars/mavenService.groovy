@@ -45,17 +45,17 @@ def call(Map appConfig, Closure body) {
                 buildStep('Validate') {
                     java.inside {
                         mvn '--version'
-                        mvn '-T 24 verify -DskipTests -DskipITs'
+                        mvn '-T 2.5C verify -DskipTests -DskipITs'
                     }
                 }
                 buildStep('Test') {
                     java.inside {
-                        mvn '-T 24 verify -DskipITs'
+                        mvn '-T 2.5C verify -DskipITs'
                     }
                 }
                 buildStep('Verify') {
                     java.args('-e SPRING_DATASOURCE_URL=jdbc:postgresql://pg:5432/postgres').with('pg', pg) {
-                        mvn '-T 24 verify -DskipTests'
+                        mvn '-T 2.5C verify -DskipTests'
                     }
                 }
                 buildStep('Build') {
